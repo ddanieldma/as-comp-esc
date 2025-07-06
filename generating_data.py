@@ -92,7 +92,6 @@ def generate_synthetic_data(
                 NORMAL_STATS[measure_type]['mean'] - ANOMALY_THRESHOLD * NORMAL_STATS[measure_type]['std'],
                 NORMAL_STATS[measure_type]['mean'] + ANOMALY_THRESHOLD * NORMAL_STATS[measure_type]['std']
             )
-            measure = float(measure)
 
             temp_hum_pres[measure_type] = measure
 
@@ -113,7 +112,7 @@ def generate_synthetic_data(
         for measure_type, measure in temp_hum_pres.items():
             if measure_type == 'umidade':
                 measure = np.clip(measure, 0, 100)
-            temp_hum_pres[measure_type] = round(measure, 2)
+            temp_hum_pres[measure_type] = round(float(measure), 2)
 
         data.append({
             'timestamp': timestamp,
