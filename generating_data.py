@@ -124,12 +124,17 @@ def generate_synthetic_data(
             **temp_hum_pres
         })
 
+    df_data = pd.DataFrame(data)
+    df_data['timestamp'] = df_data['timestamp'].astype('datetime64[us]')
     data_path = DATA_DIR / f'{data_filename}'
-    pd.DataFrame(data).to_parquet(data_path, index=False)
+    df_data.to_parquet(data_path, index=False)
     logger.info(f"Dados meteorológicos salvos em '{str(data_path)}'")
+
     if anomaly_log:
         ground_truth_path = DATA_DIR / f'{ground_truth_anomalies_filename}'
-        pd.DataFrame(anomaly_log).to_parquet(ground_truth_path, index=False)
+        df_truth = pd.DataFrame(anomaly_log)
+        df_truth['timestamp'] = df_truth['timestamp'].astype('datetime64[us]')
+        df_truth.to_parquet(ground_truth_path, index=False)
         logger.info(f"Gabarito de anomalias salvo em '{str(ground_truth_path)}'")
 
 
