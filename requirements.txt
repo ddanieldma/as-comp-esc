@@ -32,7 +32,11 @@ pandas==2.3.0
     # via as-comp-esc (pyproject.toml)
 prompt-toolkit==3.0.51
     # via click-repl
+py4j==0.10.9.9
+    # via pyspark
 pyarrow==20.0.0
+    # via as-comp-esc (pyproject.toml)
+pyspark==4.0.0
     # via as-comp-esc (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via

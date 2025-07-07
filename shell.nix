@@ -5,6 +5,10 @@
   targetPkgs = pkgs: (with pkgs; [
     python3
     uv
+    # Java (required for Spark)
+    openjdk11
+    # Apache Spark
+    spark
     # C/C++ toolchain
     gcc
     stdenv.cc.cc.lib
@@ -32,5 +36,19 @@
   profile = ''
     export PYTHONNOUSERSITE=1
     unset PYTHONPATH
+    
+    # Java configuration for Spark
+    export JAVA_HOME=${pkgs.openjdk11}
+    
+    # Spark configuration
+    export SPARK_HOME=${pkgs.spark}
+    export PATH=$SPARK_HOME/bin:$PATH
+    
+    # PySpark configuration
+    export PYSPARK_PYTHON=python3
+    export PYSPARK_DRIVER_PYTHON=python3
+    
+    # Optional: Set Spark to use Python 3 explicitly
+    export SPARK_YARN_USER_ENV="PYSPARK_PYTHON=python3"
   '';
 }).env
