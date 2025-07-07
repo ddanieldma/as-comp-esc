@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  redis:
+    image: "redis:7.2-alpine"
+    hostname: redis
+    ports:
+      - "6379:6379"
+
+  base_app: &app-base
+    build: .
+    volumes:
+      - ./:/app
+    depends_on:
+      - redis
+
+  worker:
+    <<: *app-base
+    command: >
+      bash -c "celery -A celery_app worker -l info -c $${DEGREE_OF_PARALLELISM:-2}"
+    environment:
+      - DEGREE_OF_PARALLELISM=${DEGREE_OF_PARALLELISM:-2}
+
+  controller:
+    <<: *app-base
+    command: >
+      bash -c "echo 'Waiting for...' && sleep 5 && python pipeline_controller.py"
+    environment:
+      - DEGREE_OF_PARALLELISM=${DEGREE_OF_PARALLELISM:-2}
