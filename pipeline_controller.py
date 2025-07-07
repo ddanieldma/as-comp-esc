@@ -22,6 +22,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 TEMP_DIR = DATA_DIR / 'temp_results'
+LOG_FILE_PATH = "mbw_execution_times.csv"
+
+def setup_log_file():
+    with open(LOG_FILE_PATH, "w") as f:
+        f.write("degree_of_parallelism,execution_time\n")
+
+def log_execution_time(degree, execution_time):
+    with open(LOG_FILE_PATH, "a") as f:
+        f.write(f"{degree},{execution_time}\n")
 
 
 def run_celery_pipeline(degree_of_parallelism: int):
@@ -133,6 +142,9 @@ def run_celery_pipeline(degree_of_parallelism: int):
     return final_results
 
 if __name__ == "__main__":
+    logger.info("Setting up log file")
+    setup_log_file()
+    
     # SAME NUMBER AS WORKERS IN EXECUTION
     DEGREE_OF_PARALLELISM = int(os.environ.get('DEGREE_OF_PARALLELISM', 4))
     
@@ -144,12 +156,16 @@ if __name__ == "__main__":
         logger.error("Execute the data generation script first")
     else:
         results = run_celery_pipeline(DEGREE_OF_PARALLELISM)
-        elapsed_time = time.perf_counter() - start_time
+        execution_time = time.perf_counter() - start_time
+
+        logger.info("Writing execution time to log file...")
+        log_execution_time(DEGREE_OF_PARALLELISM, execution_time)
+
 
         logger.info(f"{60 * '*'}")
         logger.info(f"Celery pipeline finished!")
         logger.info(f"Workers: {DEGREE_OF_PARALLELISM}")
-        logger.info(f"Total execution time: {elapsed_time:.4f} seconds")
+        logger.info(f"Total execution time: {execution_time:.4f} seconds")
         logger.info(f"{60 * '*'}")
 
         # Exibe um resumo dos resultados

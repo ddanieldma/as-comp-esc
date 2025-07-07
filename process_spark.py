@@ -1,7 +1,11 @@
 from pyspark.sql import SparkSession, Window
 import pyspark.sql.functions as F
 
+import time
+import os
+
 DATA_PATH = 'data/metereology_data.parquet'
+LOG_FILE_PATH = "spark_runtime.txt"
 
 def main():
     # Initializing spark session
@@ -13,6 +17,8 @@ def main():
     df = spark.read.parquet(DATA_PATH)
 
     df.cache()
+
+    start_time = time.perf_counter()
 
     # Calculating global metrics
     stats = df.agg(
@@ -51,7 +57,6 @@ def main():
         )
 
     # Saving result
-    # TODO: more efficient way
     metric_1.write.mode("overwrite").csv("output/metric_1")
 
     
@@ -114,6 +119,10 @@ def main():
 
     # Salva o resultado
     metric_3.write.mode("overwrite").csv("output/metric_3")
+
+    execution_time = time.perf_counter() - start_time
+    with open(LOG_FILE_PATH, "w") as f:
+        f.write(str(execution_time))
 
     spark.stop()
 

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import logging
 import json
+import argparse
 
 
 # ---- Setup ---
@@ -139,4 +140,8 @@ def generate_synthetic_data(
 
 
 if __name__ == "__main__":
-    generate_synthetic_data(500_000)
+    parser = argparse.ArgumentParser(description="Generate synthetic meteorological data.")
+    parser.add_argument('--events', type=int, default=5000, help='Number of samples to generate')
+    args = parser.parse_args()
+
+    generate_synthetic_data(num_samples=args.events)

@@ -14,6 +14,18 @@ import argparse  # 1. Import argparse
 from generating_data import SENSOR_TYPES, generate_synthetic_data, DATA_PATH
 
 
+# Path for the execution times log file
+LOG_FILE_PATH = "mp_execution_times.csv"
+
+def setup_log_file():
+    with open(LOG_FILE_PATH, "w") as f:
+        f.write("degree_of_parallelism,execution_time\n")
+
+def log_execution_time(degree, execution_time):
+    with open(LOG_FILE_PATH, "a") as f:
+        f.write(f"{degree},{execution_time}\n")
+
+
 # ---- Setup ---
 # Logging setup
 logging.basicConfig(
@@ -363,6 +375,9 @@ def run_full_pipeline(main_df: pd.DataFrame, degree_of_parallelism: int):
     return final_results
 
 if __name__ == "__main__":
+    logger.info("Setting up log file")
+    setup_log_file()
+    
     parser = argparse.ArgumentParser(description="Run the multiprocessing pipeline with a specific number of workers.")
     parser.add_argument(
         '--workers', 
@@ -384,7 +399,10 @@ if __name__ == "__main__":
     start_time = time.perf_counter()
     # 4. Run the pipeline a single time with the specified number of workers
     final_results = run_full_pipeline(main_df.copy(), num_workers)
-    elapsed_time = time.perf_counter() - start_time
+    execution_time = time.perf_counter() - start_time
+
+    logger.info("Writing execution time to log file...")
+    log_execution_time(num_workers, execution_time)
 
     print(f"\n--- Final Results ---")
     print("\nMetrics per station (Metrics 1 & 3):")
@@ -392,4 +410,4 @@ if __name__ == "__main__":
     print("\nHourly average by region (Metric 2):")
     print(final_results['metric2_hourly_avg_by_region'])
     
-    print(f"\nTotal execution time with {num_workers} worker(s): {elapsed_time:.2f} seconds")
+    print(f"\nTotal execution time with {num_workers} worker(s): {execution_time:.2f} seconds")
