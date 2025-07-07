@@ -8,7 +8,8 @@ import logging
 import json
 
 
-# --- Logging setup ---
+# ---- Setup ---
+# Logging setup
 logging.basicConfig(
     level=logging.INFO,
     format="[%(levelname)s] %(message)s",
@@ -18,14 +19,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- Paths setup ---
+# Paths setup
 DATA_DIR = Path().resolve() / 'data'
 DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATA_PATH = DATA_DIR / "metereology_data.parquet"
+GROUND_TRUTH_PATH = DATA_DIR / "ground_truth_anomalies.parquet"
 
-# --- Reproducibility ---
+# Reproducibility
 random.seed(42)
 
-# --- Defining regions ---
+# Defining regions
 REGIONS = [
     'Norte',
     'Nordeste',
@@ -34,8 +37,8 @@ REGIONS = [
     'Centro-oeste',
 ]
 
-# --- Defining stations ---
-NUM_STATIONS = 50
+# -- Defining stations --
+NUM_STATIONS = 200
 # 'station': 'station's region'
 stations = {}
 # Distributing stations across regions.
@@ -43,7 +46,7 @@ for i in range(1, NUM_STATIONS + 1):
     station_region = random.choice(REGIONS)
     stations[i] = station_region
 
-# --- Distributions ---
+# -- Distributions --
 # Distributtions parameters for generating the data correctly
 NORMAL_STATS = {
     'temperatura': {'mean': 22.0, 'std': 4.0},
@@ -58,15 +61,15 @@ ANOMALY_THRESHOLD = 3.0 # 3 times std
 def generate_synthetic_data(
     num_samples: int = 5000,
     anomaly_percentage: float = 0.05,
-    data_filename: str | Path = "metereology_data.parquet",
-    ground_truth_anomalies_filename: str | Path = "ground_truthh_anomalies.parquet"
+    data_filename: str | Path = DATA_PATH,
+    ground_truth_anomalies_filename: str | Path = GROUND_TRUTH_PATH
 ):
     if not isinstance(num_samples, int) or num_samples <= 0:
         raise ValueError(f"'num_samples' must be a positive non-zero integer, got: {type(num_samples)},{num_samples}")
     if not isinstance(anomaly_percentage, float) or anomaly_percentage <= 0 or anomaly_percentage >= 1:
         raise ValueError(f"'anomaly_percentage' must be a float between 0 and 1, got: {type(anomaly_percentage)},{anomaly_percentage}")
     
-    logger.info(f"Iniciando a geração de {num_samples} amostras dividas em 24h, com {anomaly_percentage * 100}% porcentagem de anomalias...")
+    logger.info(f"Iniciando a geração de {num_samples} amostras dividas em 24h, com {anomaly_percentage * 100}% de anomalias...")
 
     data = []
     anomaly_log = []
@@ -131,4 +134,4 @@ def generate_synthetic_data(
 
 
 if __name__ == "__main__":
-    generate_synthetic_data(5)
+    generate_synthetic_data(500_000)
