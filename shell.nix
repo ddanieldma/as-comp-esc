@@ -27,10 +27,6 @@
     # Network utilities
     netcat
     curl
-    # Python packages (optional - you can also install via uv/pip)
-    python3Packages.celery
-    python3Packages.redis
-    python3Packages.flower  # Celery monitoring
   ]);
   runScript = "bash";
   profile = ''
