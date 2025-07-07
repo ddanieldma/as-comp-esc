@@ -24,7 +24,6 @@ def calculate_partial_stats_task(file_path: str, start_row: int, end_row: int) -
     
     logger.info(f"Starting partial statistics calculation for rows: {start_row}-{end_row}.")
 
-    # TODO: read only the necessary chunk
     df = pd.read_parquet(file_path)
     df_chunk = df.iloc[start_row:end_row]
 
@@ -49,10 +48,11 @@ def calculate_metrics_task(self, file_path: str, station_ids_chunk: list, global
     task_id = self.request.id
     logger.info(f"[Task {task_id}] Starting metrics calculation for {len(station_ids_chunk)} stations.")
 
-    # TODO: reading only necessary data
-    main_df = pd.read_parquet(file_path)
-    main_df['timestamp'] = pd.to_datetime(main_df['timestamp'])
-    df_chunk = main_df[main_df['id_estacao'].isin(station_ids_chunk)]
+    # Reading only necessary data from parquet for optimizing read time
+    # Defining filters 
+    filters = [('id_estacao', 'in', station_ids_chunk)]
+    df_chunk = pd.read_parquet(file_path, filters=filters)
+    df_chunk['timestamp'] = pd.to_datetime(df_chunk['timestamp'])
 
     batch_results = []
     clean_data_frames = []
