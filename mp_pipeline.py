@@ -33,7 +33,6 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 def setup_shared_memory(df: pd.DataFrame) -> dict:
     """
     Deconstructs a DataFrame and moves its columns into shared memory blocks.
-    This version correctly handles CategoricalDtype.
     """
     shm_info = {'columns': {}, 'index_name': df.index.name}
     
