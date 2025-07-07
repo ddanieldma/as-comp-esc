@@ -9,6 +9,7 @@ from pathlib import Path
 import logging
 import os
 import time
+import argparse  # 1. Import argparse
 
 from generating_data import SENSOR_TYPES, generate_synthetic_data, DATA_PATH
 
@@ -362,18 +363,33 @@ def run_full_pipeline(main_df: pd.DataFrame, degree_of_parallelism: int):
     return final_results
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run the multiprocessing pipeline with a specific number of workers.")
+    parser.add_argument(
+        '--workers', 
+        type=int, 
+        default=os.cpu_count(),
+        help=f'Number of worker processes to use. Defaults to the number of CPU cores ({os.cpu_count()}).'
+    )
+    args = parser.parse_args()
+
+    num_workers = args.workers
+    
     logger.info("Reading parquet data")
     main_df = pd.read_parquet(DATA_PATH)
     logger.info(60 * "=")
     logger.info(f"Data size: {len(main_df)}")
+    logger.info(f"Running pipeline with {num_workers} worker(s)...")
     logger.info(60 * "=")
-    degree_parallelism = list(range(1, os.cpu_count() + 1))
 
-    final_dict = {}
-    for workers in degree_parallelism:
-        start_time = time.perf_counter()
-        run_full_pipeline(main_df.copy(), workers)
-        elapsed_time = time.perf_counter() - start_time
-        final_dict[workers] = elapsed_time
+    start_time = time.perf_counter()
+    # 4. Run the pipeline a single time with the specified number of workers
+    final_results = run_full_pipeline(main_df.copy(), num_workers)
+    elapsed_time = time.perf_counter() - start_time
 
-    print(final_dict)
+    print(f"\n--- Final Results ---")
+    print("\nMetrics per station (Metrics 1 & 3):")
+    print(final_results['metrics_per_station'])
+    print("\nHourly average by region (Metric 2):")
+    print(final_results['metric2_hourly_avg_by_region'])
+    
+    print(f"\nTotal execution time with {num_workers} worker(s): {elapsed_time:.2f} seconds")
